@@ -1,4 +1,4 @@
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -34,7 +34,11 @@ while True:
             last_height = new_height
 
     # Perform scrolling to load all products
-    scroll_down()
+    try:    
+        scroll_down()
+    except (TimeoutException, StaleElementReferenceException, NoSuchElementException) as e1:
+        print(e1)
+        break
 
     # Get the HTML content of the fully loaded page
     html_content = driver.page_source
@@ -56,6 +60,7 @@ while True:
         try:
             price_to = product_box.find('span', class_='product-box-price-to').text.strip()
         except:
+            print(f'Item {product_title} sem desconto!')
             price_to = price_from
 
         image_url = product_box.find('a', class_='product-box-link').find('img')['data-original']
@@ -93,8 +98,10 @@ while True:
 
         # Click on the "Next" button
         next_button.click()
-    except TimeoutException:
+    except (TimeoutException, StaleElementReferenceException, NoSuchElementException) as e2:
         # If there is no "Next" button, break out of the loop
+        print('Error 2 = ', e2)
+
         break
 
 # Close the browser
